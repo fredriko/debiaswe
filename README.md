@@ -1,4 +1,11 @@
+
+# TODO RISE
+
+* Reproduce experimemnts in notebook `tutorial_example1 Fredrik test run.ipynb`
+* Make smaller version of Swedish w2v model
+
 # Debiaswe: try to make word embeddings less sexist
+
 
 &#x1F534;[FAT* 2018 tutorial slides](https://drive.google.com/file/d/1IxIdmreH4qVYnx68QVkqCC9-_yyksoxR/view?usp=sharing)
 
