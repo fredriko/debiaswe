@@ -1,12 +1,12 @@
 from __future__ import print_function, division
 import sys
 import argparse
-from we import *
+from debiaswe.we import *
 from sklearn.svm import LinearSVC
 import json
-if sys.version_info[0] < 3:
-    import io
-    open = io.open
+#if sys.version_info[0] < 3:
+#    import io
+#    open = io.open
 """
 Learn gender specific words
 
