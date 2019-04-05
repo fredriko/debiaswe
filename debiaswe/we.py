@@ -5,8 +5,10 @@ import gensim.models
 import numpy as np
 import scipy.sparse
 from sklearn.decomposition import PCA
+
 if sys.version_info[0] < 3:
     import io
+
     open = io.open
 else:
     unicode = str
@@ -46,13 +48,29 @@ def to_utf8(text, errors='strict', encoding='utf8'):
 
 
 class WordEmbedding:
-    def __init__(self, fname):
+    def __init__(self, fname, model_type: str = "w2v", max_size_voc: int = -1):
         self.thresh = None
         self.max_words = None
         self.desc = fname
         print("*** Reading data from " + fname)
+        if model_type == "w2v":
+            vecs, words = self.load_w2v_model(fname, max_size_voc)
+        elif model_type == "fasttext":
+            vecs, words = self.load_fasttext_model(fname, max_size_voc)
+        else:
+            raise ValueError("No model type specified. Don't know what to expect. Exiting.")
+
+        self.vecs = np.array(vecs, dtype='float32')
+        print(self.vecs.shape)
+        self.words = words
+        self.reindex()
+        norms = np.linalg.norm(self.vecs, axis=1)
+        if max(norms) - min(norms) > 0.0001:
+            self.normalize()
+
+    def load_w2v_model(self, fname: str, max_size_voc: int):
         if fname.endswith(".bin"):
-            model =gensim.models.KeyedVectors.load_word2vec_format(fname, binary=True)
+            model = gensim.models.KeyedVectors.load_word2vec_format(fname, binary=True)
             words = sorted([w for w in model.vocab], key=lambda w: model.vocab[w].index)
             vecs = [model[w] for w in words]
         elif fname.endswith(".txt"):
@@ -67,19 +85,27 @@ class WordEmbedding:
                 for line in f:
                     s = line.split()
                     v = np.array([float(x) for x in s[1:]])
-                    if len(vecs) and vecs[-1].shape!=v.shape:
+                    if len(vecs) and vecs[-1].shape != v.shape:
                         print("Got weird line", line)
                         continue
-    #                 v /= np.linalg.norm(v)
+                    #                 v /= np.linalg.norm(v)
                     words.append(s[0])
                     vecs.append(v)
-        self.vecs = np.array(vecs, dtype='float32')
-        print(self.vecs.shape)
-        self.words = words
-        self.reindex()
-        norms = np.linalg.norm(self.vecs, axis=1)
-        if max(norms)-min(norms) > 0.0001:
-            self.normalize()
+        if max_size_voc > -1 and max_size_voc < len(words):
+            vecs = vecs[:max_size_voc]
+            words = words[:max_size_voc]
+        return vecs, words
+
+    def load_fasttext_model(self, fname: str, max_size_voc: int):
+        words, vecs = [], []
+        if fname.endswith(".bin"):
+            model = gensim.models.FastText.load_fasttext_format(fname)
+            words = [w for w in model.wv.vocab]
+            vecs = [model[w] for w in words]
+        if max_size_voc > -1 and max_size_voc < len(words):
+            vecs = vecs[:max_size_voc]
+            words = words[:max_size_voc]
+        return vecs, words
 
     def reindex(self):
         self.index = {w: i for i, w in enumerate(self.words)}
@@ -93,7 +119,7 @@ class WordEmbedding:
 
     def diff(self, word1, word2):
         v = self.vecs[self.index[word1]] - self.vecs[self.index[word2]]
-        return v/np.linalg.norm(v)
+        return v / np.linalg.norm(v)
 
     def normalize(self):
         self.desc += ", normalize"
@@ -102,7 +128,7 @@ class WordEmbedding:
 
     def shrink(self, numwords):
         self.desc += ", shrink " + str(numwords)
-        self.filter_words(lambda w: self.index[w]<numwords)
+        self.filter_words(lambda w: self.index[w] < numwords)
 
     def filter_words(self, test):
         """
@@ -116,7 +142,7 @@ class WordEmbedding:
 
     def save(self, filename):
         with open(filename, "w") as f:
-            f.write("\n".join([w+" " + " ".join([str(x) for x in v]) for w, v in zip(self.words, self.vecs)]))
+            f.write("\n".join([w + " " + " ".join([str(x) for x in v]) for w, v in zip(self.words, self.vecs)]))
         print("Wrote", self.n, "words to", filename)
 
     def save_w2v(self, filename, binary=True):
@@ -130,7 +156,7 @@ class WordEmbedding:
                 else:
                     fout.write(to_utf8("%s %s\n" % (word, ' '.join("%f" % val for val in row))))
 
-    def remove_directions(self, directions): #directions better be orthogonal
+    def remove_directions(self, directions):  # directions better be orthogonal
         self.desc += ", removed"
         for direction in directions:
             self.desc += " "
@@ -145,7 +171,7 @@ class WordEmbedding:
         self.normalize()
 
     def compute_neighbors_if_necessary(self, thresh, max_words):
-        thresh = float(thresh) # dang python 2.7!
+        thresh = float(thresh)  # dang python 2.7!
         if self._neighbors is not None and self.thresh == thresh and self.max_words == max_words:
             return
         print("Computing neighbors")
@@ -153,24 +179,24 @@ class WordEmbedding:
         self.max_words = max_words
         vecs = self.vecs[:max_words]
         dots = vecs.dot(vecs.T)
-        dots = scipy.sparse.csr_matrix(dots * (dots >= 1-thresh/2))
+        dots = scipy.sparse.csr_matrix(dots * (dots >= 1 - thresh / 2))
         from collections import Counter
         rows, cols = dots.nonzero()
         nums = list(Counter(rows).values())
-        print("Mean:", np.mean(nums)-1)
-        print("Median:", np.median(nums)-1)
-        rows, cols, vecs = zip(*[(i, j, vecs[i]-vecs[j]) for i, j, x in zip(rows, cols, dots.data) if i<j])
-        self._neighbors = rows, cols, np.array([v/np.linalg.norm(v) for v in vecs])
+        print("Mean:", np.mean(nums) - 1)
+        print("Median:", np.median(nums) - 1)
+        rows, cols, vecs = zip(*[(i, j, vecs[i] - vecs[j]) for i, j, x in zip(rows, cols, dots.data) if i < j])
+        self._neighbors = rows, cols, np.array([v / np.linalg.norm(v) for v in vecs])
 
     def neighbors(self, word, thresh=1):
         dots = self.vecs.dot(self.v(word))
-        return [self.words[i] for i, dot in enumerate(dots) if dot >= 1-thresh/2]
+        return [self.words[i] for i, dot in enumerate(dots) if dot >= 1 - thresh / 2]
 
     def more_words_like_these(self, words, topn=50, max_freq=100000):
         v = sum(self.v(w) for w in words)
         dots = self.vecs[:max_freq].dot(v)
         thresh = sorted(dots)[-topn]
-        words = [w for w, dot in zip(self.words, dots) if dot>=thresh]
+        words = [w for w, dot in zip(self.words, dots) if dot >= thresh]
         return sorted(words, key=lambda w: self.v(w).dot(v))[-topn:][::-1]
 
     def best_analogies_dist_thresh(self, v, thresh=1, topn=500, max_words=50000):
@@ -179,14 +205,14 @@ class WordEmbedding:
         vecs, vocab = self.vecs[:max_words], self.words[:max_words]
         self.compute_neighbors_if_necessary(thresh, max_words)
         rows, cols, vecs = self._neighbors
-        scores = vecs.dot(v/np.linalg.norm(v))
+        scores = vecs.dot(v / np.linalg.norm(v))
         pi = np.argsort(-abs(scores))
 
         ans = []
         usedL = set()
         usedR = set()
         for i in pi:
-            if abs(scores[i])<0.001:
+            if abs(scores[i]) < 0.001:
                 break
             row = rows[i] if scores[i] > 0 else cols[i]
             col = cols[i] if scores[i] > 0 else rows[i]
@@ -195,39 +221,42 @@ class WordEmbedding:
             usedL.add(row)
             usedR.add(col)
             ans.append((vocab[row], vocab[col], abs(scores[i])))
-            if len(ans)==topn:
+            if len(ans) == topn:
                 break
 
         return ans
 
 
 def viz(analogies):
-    print("\n".join(str(i).rjust(4)+a[0].rjust(29) + " | " + a[1].ljust(29) + (str(a[2]))[:4] for i, a in enumerate(analogies)))
+    print("\n".join(
+        str(i).rjust(4) + a[0].rjust(29) + " | " + a[1].ljust(29) + (str(a[2]))[:4] for i, a in enumerate(analogies)))
 
 
-def text_plot_words(xs, ys, words, width = 90, height = 40, filename=None):
-    PADDING = 10 # num chars on left and right in case words spill over
+def text_plot_words(xs, ys, words, width=90, height=40, filename=None):
+    PADDING = 10  # num chars on left and right in case words spill over
     res = [[' ' for i in range(width)] for j in range(height)]
+
     def rescale(nums):
         a = min(nums)
         b = max(nums)
-        return [(x-a)/(b-a) for x in nums]
-    print("x:", (min(xs), max(xs)), "y:",(min(ys),max(ys)))
+        return [(x - a) / (b - a) for x in nums]
+
+    print("x:", (min(xs), max(xs)), "y:", (min(ys), max(ys)))
     xs = rescale(xs)
     ys = rescale(ys)
     for (x, y, word) in zip(xs, ys, words):
-        i = int(x*(width - 1 - PADDING))
-        j = int(y*(height-1))
+        i = int(x * (width - 1 - PADDING))
+        j = int(y * (height - 1))
         row = res[j]
-        z = list(row[i2] != ' ' for i2 in range(max(i-1, 0), min(width, i + len(word) + 1)))
+        z = list(row[i2] != ' ' for i2 in range(max(i - 1, 0), min(width, i + len(word) + 1)))
         if any(z):
             continue
         for k in range(len(word)):
-            if i+k>=width:
+            if i + k >= width:
                 break
-            row[i+k] = word[k]
+            row[i + k] = word[k]
     string = "\n".join("".join(r) for r in res)
-#     return string
+    #     return string
     if filename:
         with open(filename, "w", encoding="utf8") as f:
             f.write(string)
@@ -236,14 +265,14 @@ def text_plot_words(xs, ys, words, width = 90, height = 40, filename=None):
         print(string)
 
 
-def doPCA(pairs, embedding, num_components = 10):
+def doPCA(pairs, embedding, num_components=10):
     matrix = []
     for a, b in pairs:
-        center = (embedding.v(a) + embedding.v(b))/2
+        center = (embedding.v(a) + embedding.v(b)) / 2
         matrix.append(embedding.v(a) - center)
         matrix.append(embedding.v(b) - center)
     matrix = np.array(matrix)
-    pca = PCA(n_components = num_components)
+    pca = PCA(n_components=num_components)
     pca.fit(matrix)
     # bar(range(num_components), pca.explained_variance_ratio_)
     return pca
