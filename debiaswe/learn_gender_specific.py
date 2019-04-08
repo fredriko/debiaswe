@@ -3,6 +3,7 @@ import sys
 import argparse
 from debiaswe.we import *
 from sklearn.svm import LinearSVC
+from pprint import pprint
 import json
 #if sys.version_info[0] < 3:
 #    import io
@@ -67,5 +68,8 @@ full_gender_specific = list(set([w for label, w in zip(is_gender_specific, E.wor
                             if label]).union(gender_seed))
 full_gender_specific.sort(key=lambda w: E.index[w])
 
+print(f"full_gender_specific contains {len(full_gender_specific)} entries")
+pprint(full_gender_specific)
+
 with open(OUTFILE, "w", encoding="utf-8") as f:
-    json.dump(full_gender_specific, f)
+    json.dump(full_gender_specific, f, ensure_ascii=False)
