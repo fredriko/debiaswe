@@ -48,7 +48,7 @@ def to_utf8(text, errors='strict', encoding='utf8'):
 
 
 class WordEmbedding:
-    def __init__(self, fname, model_type: str = "w2v", max_size_voc: int = -1):
+    def __init__(self, fname, model_type: str = "word2vec", max_size_voc: int = -1):
         self.thresh = None
         self.max_words = None
         self.desc = fname
