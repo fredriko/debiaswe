@@ -53,7 +53,7 @@ class WordEmbedding:
         self.max_words = None
         self.desc = fname
         print("*** Reading data from " + fname)
-        if model_type == "w2v":
+        if model_type == "word2vec":
             vecs, words = self.load_w2v_model(fname, max_size_voc)
         elif model_type == "fasttext":
             vecs, words = self.load_fasttext_model(fname, max_size_voc)
@@ -80,7 +80,6 @@ class WordEmbedding:
         else:
             vecs = []
             words = []
-
             with open(fname, "r", encoding='utf8') as f:
                 for line in f:
                     s = line.split()
@@ -91,6 +90,7 @@ class WordEmbedding:
                     #                 v /= np.linalg.norm(v)
                     words.append(s[0])
                     vecs.append(v)
+
         if max_size_voc > -1 and max_size_voc < len(words):
             vecs = vecs[:max_size_voc]
             words = words[:max_size_voc]
