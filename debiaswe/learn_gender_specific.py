@@ -41,6 +41,9 @@ print("{} seed words from '{}' out of which {} are in the embedding.".format(
     len([w for w in gender_seed if w in E.words]))
 )
 
+if NUM_TRAINING == -1:
+    NUM_TRAINING = len(E.words)
+    print(f"Setting NUM_TRAINING to {NUM_TRAINING} (was: -1)")
 gender_seed = set(w for i, w in enumerate(E.words) if w in gender_seed or (w.lower() in gender_seed and i<NUM_TRAINING))
 labeled_train = [(i, 1 if w in gender_seed else 0) for i, w in enumerate(E.words) if (i<NUM_TRAINING or w in gender_seed)]
 train_indices, train_labels = zip(*labeled_train)
