@@ -28,7 +28,7 @@ NUM_TRAINING = args.NUM_TRAINING
 GENDER_SPECIFIC_SEED_WORDS = args.GENDER_SPECIFIC_SEED_WORDS
 OUTFILE = args.outfile
 
-with open(GENDER_SPECIFIC_SEED_WORDS, "r") as f:
+with open(GENDER_SPECIFIC_SEED_WORDS, "r", encoding="utf-8") as f:
     gender_seed = json.load(f)
 
 print("Loading embedding...")
@@ -67,5 +67,5 @@ full_gender_specific = list(set([w for label, w in zip(is_gender_specific, E.wor
                             if label]).union(gender_seed))
 full_gender_specific.sort(key=lambda w: E.index[w])
 
-with open(OUTFILE, "w") as f:
+with open(OUTFILE, "w", encoding="utf-8") as f:
     json.dump(full_gender_specific, f)
