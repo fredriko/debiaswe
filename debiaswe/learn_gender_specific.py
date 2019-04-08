@@ -72,4 +72,4 @@ print(f"full_gender_specific contains {len(full_gender_specific)} entries")
 pprint(full_gender_specific)
 
 with open(OUTFILE, "w", encoding="utf-8") as f:
-    json.dump(full_gender_specific, f, ensure_ascii=False)
+    json.dump(full_gender_specific, f)
