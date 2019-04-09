@@ -10,8 +10,8 @@ if __name__ == "__main__":
     w2v_model_file = Path(root, Path("filtered-sv-word2vec-model.txt"))
     ftt_model_file = Path(root, Path("filtered-sv-fasttext-model.txt"))
 
-    model = WordEmbedding(str(ftt_model_file), model_type="word2vec", max_size_voc=-1)
-    gender_vector = model.diff("hon", "han")
+    model = WordEmbedding(str(w2v_model_file), model_type="word2vec", max_size_voc=-1)
+    gender_vector = model.diff("flygvärdinna", "pilot")
     analogies = model.best_analogies_dist_thresh(gender_vector)
     for (a, b, c) in analogies:
         print(f"{a} - {b} (score: {c})")
