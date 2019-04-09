@@ -141,8 +141,17 @@ class WordEmbedding:
         self.reindex()
 
     def save(self, filename):
-        with open(filename, "w") as f:
-            f.write("\n".join([w + " " + " ".join([str(x) for x in v]) for w, v in zip(self.words, self.vecs)]))
+        assert len(self.words) == len(self.vecs)
+        print(f"len(self.words): {len(self.words)} - len(self.vecs): {len(self.vecs)}")
+        output = [w + " " + " ".join([str(x) for x in v]) for w, v in zip(self.words, self.vecs)]
+        print(f"Number of lines in output: {len(output)}")
+        with open(filename, "w", encoding="utf-8") as f:
+            for line in output:
+                try:
+                    f.write(f"{line}\n")
+                except:
+                    print(f"Got error in line '{line}'")
+                    return
         print("Wrote", self.n, "words to", filename)
 
     def save_w2v(self, filename, binary=True):
