@@ -3,13 +3,18 @@ from debiaswe.we import WordEmbedding
 
 from pathlib import Path
 import json
+import platform
 from pprint import pprint
 
 if __name__ == "__main__":
 
     process_word2vec = False
 
-    root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models"))
+    if platform.system() == "Darwin":
+        root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models"))
+    else:
+        root = Path(Path.home(), Path("data/bias-nlp-2019/data/models"))
+
     w2v_model_file = Path(root, Path("sv-word2vec-vectors-nlpl-eu-69/model.txt"))
     ftt_model_file = Path(root, Path("sv-fasttext-crawl/cc.sv.300.bin"))
     w2v_model_debiased_file = Path(root, Path("sv-word2vec-model-debiased.txt"))
