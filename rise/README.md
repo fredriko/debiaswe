@@ -1,0 +1,1 @@
+analogy-pairs-norm-voc-debiaswe contains listings of analogy pairs generated using the functionality provided by the debiaswe repository. There will be listings made using an alternative implementation too.
