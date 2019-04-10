@@ -58,7 +58,23 @@ class WordEmbedding:
         elif model_type == "fasttext":
             vecs, words = self.load_fasttext_model(fname, max_size_voc)
         else:
-            raise ValueError("No model type specified. Don't know what to expect. Exiting.")
+            print(f"No model type given. Trying my best.")
+            vecs = []
+            words = []
+            with open(fname, "r", encoding='utf8') as f:
+                for line in f:
+                    s = line.split()
+                    v = np.array([float(x) for x in s[1:]])
+                    if len(vecs) and vecs[-1].shape != v.shape:
+                        print("Got weird line", line)
+                        continue
+                    #                 v /= np.linalg.norm(v)
+                    words.append(s[0])
+                    vecs.append(v)
+
+        if max_size_voc > -1 and max_size_voc < len(words):
+            vecs = vecs[:max_size_voc]
+            words = words[:max_size_voc]
 
         self.vecs = np.array(vecs, dtype='float32')
         print(self.vecs.shape)
