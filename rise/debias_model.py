@@ -8,7 +8,7 @@ from pprint import pprint
 
 if __name__ == "__main__":
 
-    process_word2vec = False
+    process_word2vec = True
 
     if platform.system() == "Darwin":
         root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models"))
@@ -39,8 +39,8 @@ if __name__ == "__main__":
     ftt_model_debiased_file = Path(root, Path("filtered-sv-fasttext-model-debiased.txt"))
     """
 
-    definitional_pairs_file = Path("../data/definitional_pairs_sv.json")
-    gender_specific_words_file = Path("../data/gender_specific_full_sv.json")
+    definitional_pairs_file = Path("data/definitional_pairs_sv.json")
+    gender_specific_words_file = Path("data/gender_specific_full_sv.json")
 
     with open(str(definitional_pairs_file), "r", encoding="utf-8") as fh:
         definitional_pairs = json.load(fh)
