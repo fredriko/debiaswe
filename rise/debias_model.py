@@ -10,16 +10,23 @@ if __name__ == "__main__":
 
     process_word2vec = False
 
+    """
     if platform.system() == "Darwin":
         root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models"))
     else:
         root = Path(Path.home(), Path("data/bias-nlp-2019/data/models"))
-
+    """
+    root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models/normalized-vocabulary-models"))
+    w2v_model_file = Path(root, Path("filtered-sv-word2vec-model.txt"))
+    ftt_model_file = Path(root, Path("filtered-sv-fasttext-model.txt"))
+    w2v_model_debiased_file = Path(root, Path("filtered-sv-word2vec-model-debiased.txt"))
+    ftt_model_debiased_file = Path(root, Path("filtered-sv-fasttext-model-debiased.txt"))
+    """
     w2v_model_file = Path(root, Path("sv-word2vec-vectors-nlpl-eu-69/model.txt"))
     ftt_model_file = Path(root, Path("sv-fasttext-crawl/cc.sv.300.bin"))
     w2v_model_debiased_file = Path(root, Path("sv-word2vec-model-debiased.txt"))
     ftt_model_debiased_file = Path(root, Path("sv-fasttext-model-debiased.txt"))
-
+    """
 
     if process_word2vec:
         model_file = w2v_model_file
@@ -28,16 +35,7 @@ if __name__ == "__main__":
     else:
         model_file = ftt_model_file
         model_debiased_file = ftt_model_debiased_file
-        model_type = "fasttext"
-
-
-    """
-    root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models/normalized-vocabulary-models"))
-    w2v_model_file = Path(root, Path("filtered-sv-word2vec-model.txt"))
-    ftt_model_file = Path(root, Path("filtered-sv-fasttext-model.txt"))
-    w2v_model_debiased_file = Path(root, Path("filtered-sv-word2vec-model-debiased.txt"))
-    ftt_model_debiased_file = Path(root, Path("filtered-sv-fasttext-model-debiased.txt"))
-    """
+        model_type = "word2vec"
 
     definitional_pairs_file = Path("../data/definitional_pairs_sv.json")
     gender_specific_words_file = Path("../data/gender_specific_full_sv.json")

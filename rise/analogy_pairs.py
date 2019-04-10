@@ -1,17 +1,27 @@
 from debiaswe.we import WordEmbedding
 from pathlib import Path
+import json
 
 if __name__ == "__main__":
 
-    root = Path(Path.home(), Path("data/bias-nlp-2019/data/models/normalized-vocabulary-models")).resolve()
+    root = Path(Path.home(), Path("data/bias-nlp-2019/data/models/")).resolve()
 
-    # Use vocabulary normalized versions of the Swedish word2vec and FastText models. The models are on the
-    # same format.
-    w2v_model_file = Path(root, Path("filtered-sv-word2vec-model.txt"))
-    ftt_model_file = Path(root, Path("filtered-sv-fasttext-model.txt"))
+    w2v_model_file = Path(root, Path("sv-word2vec-vectors-nlpl-eu-69/model.txt"))
+    debiased_w2v_model_file = Path(root, Path("sv-word2vec-vectors-nlpl-eu-69/sv-word2vec-model-debiased.txt"))
+    ftt_model_file = Path(root, Path("sv-fasttext-crawl/cc.sv.300.bin"))
+    debiased_ftt_model_file = Path(root, Path("sv-fasttext-crawl/"))
 
-    model = WordEmbedding(str(w2v_model_file), model_type="word2vec", max_size_voc=-1)
-    gender_vector = model.diff("flygvärdinna", "pilot")
-    analogies = model.best_analogies_dist_thresh(gender_vector)
-    for (a, b, c) in analogies:
-        print(f"{a} - {b} (score: {c})")
+    configs = {
+        (w2v_model_file, "word2vec", Path(root, Path("analogy-pairs-hon-han-word2vec.txt"))),
+        (debiased_w2v_model_file, "word2vec", Path(root, Path("analogy-pairs-hon-han-debiased-word2vec.txt"))),
+        (ftt_model_file, "fasttext", Path(root, Path("analogy-pairs-hon-han-fasttext.txt"))),
+        (debiased_ftt_model_file, "word2vec", Path(root, Path("analogy-pairs-hon-han-debiased-fasttext.txt"))),
+    }
+
+    for config in configs:
+        print(f"Processing configuration: {config}")
+        model = WordEmbedding(str(config[0]), model_type=config[1], max_size_voc=-1)
+        gender_vector = model.diff("hon", "han")
+        analogies = model.best_analogies_dist_thresh(gender_vector)
+        with open(str(config[2]), "w", encoding="utf-8") as fh:
+            json.dump(analogies, fh, indent=2)
