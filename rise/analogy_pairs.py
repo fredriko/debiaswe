@@ -12,10 +12,10 @@ if __name__ == "__main__":
     debiased_ftt_model_file = Path(root, Path("sv-fasttext-crawl/sv-fasttext-model-debiased.txt"))
 
     configs = [
-        (w2v_model_file, "word2vec", Path(root, Path("analogy-pairs-hon-han-word2vec.txt"))),
-        (debiased_w2v_model_file, "", Path(root, Path("analogy-pairs-hon-han-debiased-word2vec.txt"))),
+#        (w2v_model_file, "word2vec", Path(root, Path("analogy-pairs-hon-han-word2vec.txt"))),
+#        (debiased_w2v_model_file, "", Path(root, Path("analogy-pairs-hon-han-debiased-word2vec.txt"))),
         (ftt_model_file, "fasttext", Path(root, Path("analogy-pairs-hon-han-fasttext.txt"))),
-        (debiased_ftt_model_file, "", Path(root, Path("analogy-pairs-hon-han-debiased-fasttext.txt")))
+#        (debiased_ftt_model_file, "", Path(root, Path("analogy-pairs-hon-han-debiased-fasttext.txt")))
     ]
 
     for config in configs:
