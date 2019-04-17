@@ -8,26 +8,35 @@ from pprint import pprint
 
 if __name__ == "__main__":
 
-    process_word2vec = True
+    #process_word2vec = True
 
-    """
+    process_elmo = False
+
     if platform.system() == "Darwin":
         root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models"))
     else:
         root = Path(Path.home(), Path("data/bias-nlp-2019/data/models"))
     """
-    root = Path(Path.home(), Path("Dropbox/RISE/research/bias-nlp-2019/data/models/normalized-vocabulary-models"))
     w2v_model_file = Path(root, Path("filtered-sv-word2vec-model.txt"))
     ftt_model_file = Path(root, Path("filtered-sv-fasttext-model.txt"))
     w2v_model_debiased_file = Path(root, Path("filtered-sv-word2vec-model-debiased.txt"))
     ftt_model_debiased_file = Path(root, Path("filtered-sv-fasttext-model-debiased.txt"))
     """
-    w2v_model_file = Path(root, Path("sv-word2vec-vectors-nlpl-eu-69/model.txt"))
-    ftt_model_file = Path(root, Path("sv-fasttext-crawl/cc.sv.300.bin"))
-    w2v_model_debiased_file = Path(root, Path("sv-word2vec-model-debiased.txt"))
-    ftt_model_debiased_file = Path(root, Path("sv-fasttext-model-debiased.txt"))
-    """
 
+    elmo_model_file = Path(root, Path("bias_elmo.txt"))
+    elmo_model_debiased_file = Path(root, Path("debiased_elmo.txt"))
+    bert_model_file = Path(root, Path("bias_bert.txt"))
+    bert_model_debiased_file = Path(root, Path("debiased_bert.txt"))
+
+    if process_elmo:
+        model_file = elmo_model_file
+        model_debiased_file = elmo_model_debiased_file
+        model_type = "word2vec"
+    else:
+        model_file = bert_model_file
+        model_debiased_file = bert_model_debiased_file
+        model_type = "word2vec"
+    """
     if process_word2vec:
         model_file = w2v_model_file
         model_debiased_file = w2v_model_debiased_file
@@ -36,9 +45,10 @@ if __name__ == "__main__":
         model_file = ftt_model_file
         model_debiased_file = ftt_model_debiased_file
         model_type = "word2vec"
+    """
 
-    definitional_pairs_file = Path("data/definitional_pairs_sv.json")
-    gender_specific_words_file = Path("data/gender_specific_full_sv.json")
+    definitional_pairs_file = Path("../data/definitional_pairs_sv.json")
+    gender_specific_words_file = Path("../data/gender_specific_full_sv.json")
 
     with open(str(definitional_pairs_file), "r", encoding="utf-8") as fh:
         definitional_pairs = json.load(fh)
