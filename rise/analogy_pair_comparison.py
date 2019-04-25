@@ -75,7 +75,6 @@ def annotated_analogy_pairs_comparison():
 def overlap_between_models():
     root = Path(Path(__file__).parent, Path("annotated-analogy-pairs"))
     fredrik = Path(root, "fredrik")
-    magnus = Path(root, "magnus")
 
     w2v = "analogy-pairs-hon-han-word2vec.csv"
     w2v_debiased = "analogy-pairs-hon-han-debiased-word2vec.csv"
